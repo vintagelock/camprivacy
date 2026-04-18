@@ -127,6 +127,7 @@ export function useWebGLPipeline(
   const glRef = useRef<WebGL2RenderingContext | null>(null);
   const programsRef = useRef<Programs | null>(null);
   const facesRef = useRef<FaceRegion[]>([]);
+  const smoothedFacesRef = useRef<FaceRegion[]>([]);
   const effectRef = useRef<EffectConfig | null>(null);
   const emojiTexCache = useRef<Map<string, WebGLTexture>>(new Map());
 
@@ -311,7 +312,30 @@ export function useWebGLPipeline(
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
 
       const effect = effectRef.current;
-      const faces = facesRef.current;
+
+      // Lerp smoothed face positions toward the latest detected positions each
+      // render frame. This eliminates jitter from the 15fps detection cadence.
+      const LERP = 0.35;
+      const detected = facesRef.current;
+      const smoothed = smoothedFacesRef.current;
+
+      if (detected.length !== smoothed.length) {
+        // Count changed — snap immediately to avoid orphaned boxes
+        smoothedFacesRef.current = detected.map((f) => ({ ...f }));
+      } else {
+        for (let i = 0; i < detected.length; i++) {
+          const d = detected[i];
+          const s = smoothed[i];
+          smoothed[i] = {
+            x: s.x + (d.x - s.x) * LERP,
+            y: s.y + (d.y - s.y) * LERP,
+            width: s.width + (d.width - s.width) * LERP,
+            height: s.height + (d.height - s.height) * LERP,
+          };
+        }
+      }
+
+      const faces = smoothedFacesRef.current;
 
       if (!effect || effect.type === 'none' || faces.length === 0) {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);

@@ -20,10 +20,14 @@ import defaultCustomShader from '../shaders/custom.frag.glsl?raw';
 interface Props {
   effect: EffectConfig;
   enabled: boolean;
+  mirrored: boolean;
+  showDebug: boolean;
   deviceId: string | null;
   devices: MediaDeviceInfo[];
   onChange: (patch: Partial<EffectConfig>) => void;
   onEnabledChange: (v: boolean) => void;
+  onMirroredChange: (v: boolean) => void;
+  onShowDebugChange: (v: boolean) => void;
   onDeviceChange: (id: string) => void;
 }
 
@@ -35,7 +39,19 @@ const EFFECT_OPTIONS: { label: string; value: EffectType }[] = [
   { label: 'Shader', value: 'shader' },
 ];
 
-export function Controls({ effect, enabled, deviceId, devices, onChange, onEnabledChange, onDeviceChange }: Props) {
+export function Controls({
+  effect,
+  enabled,
+  mirrored,
+  showDebug,
+  deviceId,
+  devices,
+  onChange,
+  onEnabledChange,
+  onMirroredChange,
+  onShowDebugChange,
+  onDeviceChange,
+}: Props) {
   return (
     <Stack gap="md" p="md" style={{ height: '100%', overflowY: 'auto' }}>
       <Title order={5} c="dimmed">
@@ -50,6 +66,13 @@ export function Controls({ effect, enabled, deviceId, devices, onChange, onEnabl
         data={devices.map((d) => ({ value: d.deviceId, label: d.label || d.deviceId }))}
         value={deviceId}
         onChange={(v) => v && onDeviceChange(v)}
+      />
+
+      <Switch label="Mirror video" checked={mirrored} onChange={(e) => onMirroredChange(e.currentTarget.checked)} />
+      <Switch
+        label="Debug bounding boxes"
+        checked={showDebug}
+        onChange={(e) => onShowDebugChange(e.currentTarget.checked)}
       />
 
       <Switch

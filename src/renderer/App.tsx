@@ -14,6 +14,8 @@ const theme = createTheme({
 export default function App() {
   const [effect, setEffect] = useState<EffectConfig>(DEFAULT_EFFECT);
   const [enabled, setEnabled] = useState(true);
+  const [mirrored, setMirrored] = useState(true);
+  const [showDebug, setShowDebug] = useState(false);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [deviceId, setDeviceId] = useState<string | null>(null);
 
@@ -51,6 +53,10 @@ export default function App() {
             devices={devices}
             onChange={patchEffect}
             onEnabledChange={setEnabled}
+            mirrored={mirrored}
+            onMirroredChange={setMirrored}
+            showDebug={showDebug}
+            onShowDebugChange={setShowDebug}
             onDeviceChange={setDeviceId}
           />
         </AppShell.Navbar>
@@ -65,7 +71,13 @@ export default function App() {
           }}
         >
           <Box style={{ width: '100%', maxWidth: 1200 }}>
-            <VideoFeed effect={effect} enabled={enabled} deviceId={deviceId} />
+            <VideoFeed
+              effect={effect}
+              enabled={enabled}
+              mirrored={mirrored}
+              showDebug={showDebug}
+              deviceId={deviceId}
+            />
           </Box>
         </AppShell.Main>
       </AppShell>
